@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KPK Interaktif (Kelas 5 SD)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue background */
+        }
+        .card {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+        .input-box {
+            border: 2px solid #3b82f6;
+            transition: border-color 0.3s;
+        }
+        .input-box:focus {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.5);
+        }
+        .result-item {
+            display: inline-block;
+            padding: 4px 8px;
+            margin: 4px;
+            border-radius: 6px;
+            font-weight: 600;
+            background-color: #e5e7eb; /* Gray default */
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        .highlight {
+            background-color: #facc15; /* Yellow for common multiples */
+            color: #1f2937;
+            animation: pulse-highlight 0.5s ease-in-out;
+        }
+        .kpk-result {
+            background-color: #10b981; /* Green for final answer */
+            color: white;
+            transform: scale(1.1);
+        }
+        @keyframes pulse-highlight {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8 min-h-screen">
+
+    <div class="max-w-4xl mx-auto">
+        
+        <!-- Header / Judul -->
+        <header class="text-center mb-8 p-4 bg-white rounded-xl card">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-blue-600 mb-2">🚀 Mesin Pencari KPK Interaktif</h1>
+            <p class="text-gray-600 text-lg">Ayo kita temukan Kelipatan Persekutuan Terkecil (KPK) dari dua bilangan!</p>
+        </header>
+
+        <!-- Input Section -->
+        <div class="bg-white p-6 sm:p-8 rounded-xl card mb-8">
+            <h2 class="text-2xl font-bold text-red-500 mb-4 border-b pb-2">1. Masukkan Bilangan</h2>
+            <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                <div class="flex-1">
+                    <label for="numberA" class="block text-gray-700 font-semibold mb-2">Bilangan Pertama (A):</label>
+                    <input type="number" id="numberA" placeholder="Contoh: 4" min="1" class="w-full p-3 rounded-lg input-box focus:outline-none" required>
+                </div>
+                <div class="flex-1">
+                    <label for="numberB" class="block text-gray-700 font-semibold mb-2">Bilangan Kedua (B):</label>
+                    <input type="number" id="numberB" placeholder="Contoh: 6" min="1" class="w-full p-3 rounded-lg input-box focus:outline-none" required>
+                </div>
+            </div>
+            
+            <button id="findKPKBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.01] focus:outline-none focus:ring-4 focus:ring-blue-300">
+                Cari KPK!
+            </button>
+        </div>
+
+        <!-- Result Section -->
+        <div id="resultsContainer" class="hidden">
+            <div class="bg-white p-6 sm:p-8 rounded-xl card mb-8">
+                <h2 class="text-2xl font-bold text-red-500 mb-4 border-b pb-2">2. Hasil Kelipatan</h2>
+                
+                <!-- Multiples of A -->
+                <div id="multiplesA" class="mb-6 p-4 border rounded-lg bg-blue-50">
+                    <h3 class="text-lg font-semibold text-blue-800 mb-2">Kelipatan dari <span id="labelA">A</span>:</h3>
+                    <div id="listA" class="flex flex-wrap">
+                        <!-- Multiples will be injected here -->
+                    </div>
+                </div>
+
+                <!-- Multiples of B -->
+                <div id="multiplesB" class="p-4 border rounded-lg bg-green-50">
+                    <h3 class="text-lg font-semibold text-green-800 mb-2">Kelipatan dari <span id="labelB">B</span>:</h3>
+                    <div id="listB" class="flex flex-wrap">
+                        <!-- Multiples will be injected here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Final KPK Result -->
+            <div class="bg-yellow-100 p-6 sm:p-8 rounded-xl card text-center border-4 border-yellow-400">
+                <h2 class="text-3xl font-extrabold text-orange-600 mb-4">3. Kelipatan Persekutuan Terkecil (KPK)</h2>
+                <div id="kpkResult" class="text-5xl font-extrabold text-gray-800 p-4 inline-block result-item kpk-result">
+                    <!-- KPK result will be injected here -->
+                </div>
+                <p id="kpkDescription" class="mt-4 text-gray-700 text-xl font-medium">
+                    <!-- Description will be injected here -->
+                </p>
+            </div>
+        </div>
+
+        <!-- Notification Modal (Instead of alert()) -->
+        <div id="notificationModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden flex items-center justify-center p-4 z-50">
+            <div class="bg-white p-6 rounded-lg shadow-2xl max-w-sm w-full text-center">
+                <h3 class="text-xl font-bold text-red-600 mb-4">Perhatian!</h3>
+                <p id="notificationMessage" class="mb-6 text-gray-700"></p>
+                <button onclick="document.getElementById('notificationModal').classList.add('hidden')" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">
+                    Oke
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Global variables for DOM elements
+        const numAInput = document.getElementById('numberA');
+        const numBInput = document.getElementById('numberB');
+        const findKPKBtn = document.getElementById('findKPKBtn');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const labelA = document.getElementById('labelA');
+        const labelB = document.getElementById('labelB');
+        const listA = document.getElementById('listA');
+        const listB = document.getElementById('listB');
+        const kpkResult = document.getElementById('kpkResult');
+        const kpkDescription = document.getElementById('kpkDescription');
+        const notificationModal = document.getElementById('notificationModal');
+        const notificationMessage = document.getElementById('notificationMessage');
+        
+        // --- Utility Functions ---
+
+        /**
+         * Shows a custom notification modal.
+         * @param {string} message - The message to display.
+         */
+        function showNotification(message) {
+            notificationMessage.textContent = message;
+            notificationModal.classList.remove('hidden');
+        }
+
+        /**
+         * Calculates multiples of a number up to a certain count.
+         * @param {number} num - The base number.
+         * @param {number} maxCount - The maximum number of multiples to calculate.
+         * @returns {number[]} An array of multiples.
+         */
+        function getMultiples(num, maxCount = 12) {
+            const multiples = [];
+            for (let i = 1; i <= maxCount; i++) {
+                multiples.push(num * i);
+            }
+            return multiples;
+        }
+
+        /**
+         * Compares two lists of multiples and finds the smallest common multiple (KPK).
+         * @param {number[]} multiples1 - List of multiples for the first number.
+         * @param {number[]} multiples2 - List of multiples for the second number.
+         * @returns {{common: number[], kpk: number | null}} An object containing the common multiples and the KPK.
+         */
+        function findKPK(multiples1, multiples2) {
+            const set2 = new Set(multiples2);
+            const common = [];
+            let kpk = null;
+
+            for (const m1 of multiples1) {
+                if (set2.has(m1)) {
+                    common.push(m1);
+                    if (kpk === null) {
+                        kpk = m1;
+                    }
+                }
+            }
+            return { common, kpk };
+        }
+
+        /**
+         * Renders the list of multiples and highlights common ones.
+         * @param {HTMLElement} listElement - The container to render into (listA or listB).
+         * @param {number[]} multiples - The array of multiples to display.
+         * @param {number[]} commonMultiples - The array of common multiples for highlighting.
+         */
+        function renderMultiples(listElement, multiples, commonMultiples) {
+            listElement.innerHTML = '';
+            const isCommonSet = new Set(commonMultiples);
+
+            multiples.forEach(multiple => {
+                const isCommon = isCommonSet.has(multiple);
+                const item = document.createElement('span');
+                
+                item.textContent = multiple;
+                item.classList.add('result-item', 'text-sm', 'sm:text-base'); // Base styles
+
+                if (isCommon) {
+                    item.classList.add('highlight');
+                }
+                
+                listElement.appendChild(item);
+            });
+        }
+        
+        /**
+         * Main function to handle the KPK calculation and display.
+         */
+        function handleFindKPK() {
+            // 1. Get and validate input
+            const numA = parseInt(numAInput.value);
+            const numB = parseInt(numBInput.value);
+
+            if (isNaN(numA) || isNaN(numB) || numA <= 0 || numB <= 0) {
+                showNotification("Mohon masukkan dua bilangan bulat positif yang valid (lebih dari 0).");
+                resultsContainer.classList.add('hidden');
+                return;
+            }
+
+            // Reset UI
+            resultsContainer.classList.remove('hidden');
+            labelA.textContent = numA;
+            labelB.textContent = numB;
+            listA.innerHTML = '<span class="text-gray-500">Menghitung...</span>';
+            listB.innerHTML = '<span class="text-gray-500">Menghitung...</span>';
+            kpkResult.textContent = '...';
+            kpkResult.classList.remove('kpk-result');
+            kpkDescription.textContent = 'Sedang mencari kelipatan persekutuan...';
+            
+            // 2. Calculate Multiples (Up to 12 times)
+            const multiplesA = getMultiples(numA, 12);
+            const multiplesB = getMultiples(numB, 12);
+
+            // 3. Find KPK
+            const { common, kpk } = findKPK(multiplesA, multiplesB);
+
+            // 4. Render Results
+            
+            // Render list A
+            setTimeout(() => {
+                renderMultiples(listA, multiplesA, common);
+            }, 500);
+
+            // Render list B
+            setTimeout(() => {
+                renderMultiples(listB, multiplesB, common);
+            }, 1000);
+
+            // Render final KPK result
+            setTimeout(() => {
+                if (kpk) {
+                    kpkResult.textContent = kpk;
+                    kpkResult.classList.add('kpk-result');
+                    kpkDescription.innerHTML = `Kelipatan persekutuan terkecil (KPK) dari ${numA} dan ${numB} adalah: 
+                        <span class="font-bold text-green-700">${kpk}</span>. Ini adalah bilangan kelipatan bersama yang paling kecil!`;
+                } else {
+                    // Fallback in case 12 multiples wasn't enough (rare for small SD numbers)
+                    kpkResult.textContent = '??';
+                    kpkDescription.innerHTML = 'KPK belum ditemukan dalam 12 kelipatan. Coba lagi dengan bilangan yang lebih kecil atau lanjutkan daftar kelipatan secara manual.';
+                }
+            }, 1500);
+
+            // Scroll to results
+            setTimeout(() => {
+                resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 1600);
+        }
+
+        // Attach event listener
+        findKPKBtn.addEventListener('click', handleFindKPK);
+
+        // Optional: Allow pressing Enter in the input fields to trigger search
+        numAInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleFindKPK(); });
+        numBInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleFindKPK(); });
+    </script>
+</body>
+</html>
